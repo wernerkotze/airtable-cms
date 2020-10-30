@@ -1,17 +1,24 @@
 from airtable import Airtable
+from facebook_business.api import FacebookAdsApi
+from facebook_business.adobjects.adcreative import AdCreative
+
 from datetime import datetime
 
-import os
 import traceback
 import configparser
 
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
-# Airtable Variables 
-at_table_name = config.get('AIRTABLE', 'AIRTABLE_TABLE_NAME')
-at_base_id = config.get('AIRTABLE', 'AIRTABLE_BASE_ID')
-at_api_key = config.get('AIRTABLE', 'AIRTABLE_API_KEY')
+# Airtable Variables
+at_table_name = config.get('AIRTABLE', 'TABLE_NAME')
+at_base_id = config.get('AIRTABLE', 'BASE_ID')
+at_api_key = config.get('AIRTABLE', 'API_KEY')
+
+# Facebook Variables
+fb_app_id = config.get('FACEBOOK', 'APP_ID')
+fb_secret = config.get('FACEBOOK', 'APP_SECRET')
+fb_token = config.get('FACEBOOK', 'ACCESS_TOKEN')
 
 class airtableSync:
 	def __init__(self, record_id, table_name = at_table_name):
