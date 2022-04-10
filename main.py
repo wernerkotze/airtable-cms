@@ -36,7 +36,7 @@ class Quicket:
 		self.api_key  = api_key
 
 	def get_events(self, pageSize, lastModified = today):
-		url = f"{self.base_url}?api_key={self.api_key}&pageSize={pageSize}&page=1&lastModified={lastModified}"
+		url = f"{self.base_url}?api_key={self.api_key}&pageSize=1&page=1&lastModified={lastModified}"
 
 		payload = {}
 		headers = {}
