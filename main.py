@@ -1,7 +1,4 @@
-from airtable import Airtable
-from facebook_business.api import FacebookAdsApi
-from facebook_business.adobjects.adaccount import AdAccount
-from facebook_business.adobjects.campaign import Campaign
+from pyairtable import Table
 
 from datetime import datetime
 
@@ -9,22 +6,20 @@ import traceback
 import configparser
 import requests
 
+
 config = configparser.ConfigParser()
 config.read('config.cfg')
 
-# Airtable Variables
+# Airtable 
 at_table_name = config.get('AIRTABLE', 'TABLE_NAME')
 at_base_id = config.get('AIRTABLE', 'BASE_ID')
 at_api_key = config.get('AIRTABLE', 'API_KEY')
 
-# Facebook Variables
-fb_app_id = config.get('FACEBOOK', 'APP_ID')
-fb_secret = config.get('FACEBOOK', 'APP_SECRET')
-fb_token = config.get('FACEBOOK', 'ACCESS_TOKEN')
+# Quicket 
+quicket_base_url = config.get('QUICKET', 'BASE_URL')
+quicket_api_key = config.get('QUICKET', 'API_KEY')
 
-print(fb_app_id,
-fb_secret,
-fb_token)
+today = datetime.today().strftime('%Y-%m-%d-%H:%M:%S')
 
 class airtableSync:
 	def __init__(self, record_id, table_name = at_table_name):
@@ -34,42 +29,35 @@ class airtableSync:
 	def at_instance(self):
 		return Airtable(at_base_id, self.table_name, api_key=at_api_key)
 
-	def fb_instance(self):
-		return FacebookAdsApi.init(fb_app_id, fb_secret, fb_token)
 
-	def get_adset_id(self):
-		return self.at_instance().get(self.record_id)['fields']['FB Adset ID']
+class Quicket:
+	def __init__(self, base_url = quicket_base_url, api_key = quicket_api_key):
+		self.base_url = base_url
+		self.api_key  = api_key
 
-	def get_campaign_insights(self):
-		fb_instance = self.fb_instance()
+	def get_events(self, pageSize, lastModified = today):
+		url = f"{self.base_url}?api_key={self.api_key}&pageSize=1&page=1&lastModified={lastModified}"
 
-		print(fb_instance.__dict__)
+		payload = {}
+		headers = {}
 
-		adset_id = self.get_adset_id()
+		response = requests.request("GET", url, headers=headers, data=payload)
 
-		fields = [
-			'cost_per_conversion'
-		]
-
-		params = {
-		  'fields': fields,
-		  'access_token': fb_token
-		}
-
-		response = requests.get(f'https://graph.facebook.com/v8.0/23845695225790479/insights', params=params)
-		print(response.__dict__)
-
-		return response
+		return response.text
 
 
-# set test variables
-record_id  = "recDE4SwTI2fI9Lqh"
+# Quicket tets
 
-p1 = airtableSync(record_id, at_table_name)
+p1 = Quicket(quicket_base_url, quicket_api_key)
 
-campaign_id = p1.get_adset_id()
-campaign_insights = p1.get_campaign_insights()
+results = p1.get_events(10)
 
-print(f"Adset ID: {campaign_id}")
-print(f"Campaign Insights: {campaign_insights}")
+print(f"Events: {results}")
+
+# AT test
+
+# table = Table(at_api_key, at_base_id, at_table_name)
+# results = table.all()
+
+# print(results)
 
